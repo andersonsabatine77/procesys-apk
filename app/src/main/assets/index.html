@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProcesSys</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg1:#0f1117;--bg2:#1a1d27;--bgc:#20232e;--bgi:#252836;--bgh:#2f3347;--acc:#4f8ef7;--accH:#3a7ae8;--ok:#2ecc71;--warn:#f39c12;--err:#e74c3c;--t1:#e8eaf0;--t2:#8b90a4;--tm:#5a5f73;--bd:#2e3248;--r:10px;--rs:6px}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg1);color:var(--t1);font-size:14px;min-height:100vh}
+.layout{display:flex;min-height:100vh}
+.sb{width:255px;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sb-head{padding:16px 12px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.logo{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:700;margin-bottom:13px}
+.logo-i{width:34px;height:34px;background:linear-gradient(135deg,#4f8ef7,#6c63ff);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px}
+.srch{position:relative}
+.srch input{width:100%;background:var(--bgi);border:1px solid var(--bd);border-radius:var(--rs);color:var(--t1);padding:7px 11px 7px 32px;font-size:13px;outline:none}
+.srch input:focus{border-color:var(--acc)}
+.srch-ic{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--tm);pointer-events:none}
+.sb-body{flex:1;overflow-y:auto;padding:8px 6px}
+.sb-lbl{font-size:10px;font-weight:600;letter-spacing:1px;color:var(--tm);padding:7px 8px 3px;text-transform:uppercase}
+.fac-wrap{margin-bottom:2px}
+.fac-row{display:flex;align-items:center;justify-content:space-between;padding:7px 8px;border-radius:var(--rs);cursor:pointer;font-size:13px;font-weight:600;color:var(--t2);transition:background .15s;user-select:none}
+.fac-row:hover{background:var(--bgh);color:var(--t1)}
+.fac-l{display:flex;align-items:center;gap:7px}
+.fac-actions{display:flex;align-items:center;gap:3px;} /* Novo estilo para os botões de ação da fábrica */
+.chev{font-size:10px;transition:transform .2s;display:inline-block}
+.line-list{padding-left:24px;display:none}
+.ln-row{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:var(--rs);cursor:pointer;font-size:12.5px;color:var(--tm);transition:all .15s}
+.ln-row:hover{background:var(--bgh);color:var(--t1)}
+.ln-row.active{background:rgba(79,142,247,.13);color:var(--acc)}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.d-ok{background:var(--ok)}.d-err{background:var(--err)}.d-warn{background:var(--warn)}.d-def{background:var(--bd)}
+.ln-row.active .dot{background:var(--acc)}
+.sb-foot{padding:10px 8px;border-top:1px solid var(--bd);flex-shrink:0}
+.btn-sb{width:100%;background:var(--acc);color:#fff;border:none;border-radius:var(--rs);padding:9px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
+.btn-sb:hover{background:var(--accH)}
+.sb-io{padding:8px;border-top:1px solid var(--bd);display:flex;gap:6px;flex-shrink:0}
+.main{margin-left:255px;flex:1;display:flex;flex-direction:column}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--bd);padding:13px 26px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.tb-t{font-size:17px;font-weight:700}
+.tb-s{font-size:12px;color:var(--tm);margin-top:2px}
+.tb-a{display:flex;align-items:center;gap:8px}
+.content{padding:22px 26px;flex:1}
+.btn{padding:7px 15px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:5px;transition:all .2s}
+.bp{background:var(--acc);color:#fff}.bp:hover{background:var(--accH)}
+.bs{background:var(--bgi);color:var(--t2);border:1px solid var(--bd)}.bs:hover{background:var(--bgh);color:var(--t1)}
+.bd2{background:var(--err);color:#fff}.bd2:hover{background:#c0392b}
+.bsm{padding:5px 11px;font-size:12px}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:65vh;text-align:center;gap:14px}
+.w-ico{font-size:60px;opacity:.25}
+.w-t{font-size:22px;font-weight:700;color:var(--t2)}
+.w-s{font-size:14px;color:var(--tm);max-width:360px;line-height:1.7}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.sc{background:var(--bgc);border:1px solid var(--bd);border-radius:var(--r);padding:13px 15px}
+.sc-l{font-size:11px;color:var(--tm);text-transform:uppercase;letter-spacing:.4px}
+.sc-v{font-size:21px;font-weight:700}
+.sc-s{font-size:11px;color:var(--tm);margin-top:1px}
+.tab-bar{display:flex;gap:2px;background:var(--bgi);border-radius:var(--r);padding:4px;margin-bottom:18px;flex-wrap:wrap}
+.tb{padding:7px 15px;border-radius:7px;border:none;background:transparent;color:var(--tm);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap}
+.tb:hover{color:var(--t1);background:var(--bgh)}
+.tb.active{background:var(--bgc);color:var(--t1);font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.tc{display:none}.tc.active{display:block}
+.sec-tabs{display:flex;border-bottom:1px solid var(--bd);margin-bottom:18px;overflow-x:auto}
+.st{padding:8px 16px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--tm);font-size:13px;cursor:pointer;transition:all .2s;white-space:nowrap;margin-bottom:-1px}
+.st:hover{color:var(--t1)}
+.st.active{color:var(--acc);border-bottom-color:var(--acc);font-weight:600}
+.card{background:var(--bgc);border:1px solid var(--bd);border-radius:var(--r);padding:18px;margin-bottom:14px}
+.ct{font-size:14px;font-weight:700;margin-bottom:15px;display:flex;align-items:center;gap:8px}
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:12px}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld.full{grid-column:1/-1}
+.fld label{font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.3px;display:flex;align-items:center;gap:5px} /* Adicionado display flex para o label */
+.fld input,.fld select,.fld textarea{background:var(--bgi);border:1px solid var(--bd);border-radius:var(--rs);color:var(--t1);padding:8px 11px;font-size:13px;outline:none;font-family:inherit;width:100%;transition:border-color .2s}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--acc)}
+.fld select option{background:var(--bgc)}
+.fld textarea{resize:vertical;min-height:76px}
+.fld input::placeholder,.fld textarea::placeholder{color:var(--tm)}
+.dv{border:none;border-top:1px solid var(--bd);margin:14px 0}
+.li-list{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.li{background:var(--bgi);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 13px;display:flex;align-items:flex-start;gap:10px}
+.li-b{flex:1}
+.li-t{font-size:13px;font-weight:600}
+.li-m{font-size:12px;color:var(--tm);margin-top:3px;line-height:1.5}
+.li-a{display:flex;gap:3px;flex-shrink:0}
+.ib{background:none;border:none;color:var(--tm);cursor:pointer;padding:4px 6px;border-radius:4px;font-size:14px;transition:all .15s}
+.ib:hover{background:var(--bgh);color:var(--t1)}
+.ib.d:hover{color:var(--err)}
+.tag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.tg{background:rgba(46,204,113,.15);color:#2ecc71}
+.tr{background:rgba(231,76,60,.15);color:#e74c3c}
+.to{background:rgba(243,156,18,.15);color:#f39c12}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
+.mo-box{background:var(--bgc);border:1px solid var(--bd);border-radius:13px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 6px 30px rgba(0,0,0,.5);animation:su .2s ease}
+.mo-box.wide{max-width:600px}
+@keyframes su{from{transform:translateY(18px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mo-h{padding:17px 19px 13px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.mo-title{font-size:15px;font-weight:700}
+.mo-x{background:none;border:none;color:var(--tm);font-size:19px;cursor:pointer;padding:3px;border-radius:4px;line-height:1}
+.mo-x:hover{color:var(--t1)}
+.mo-body{padding:19px;display:flex;flex-direction:column;gap:11px}
+.mo-foot{padding:13px 19px;border-top:1px solid var(--bd);display:flex;gap:8px;justify-content:flex-end}
+.pills{display:flex;gap:6px}
+.pill{padding:7px 18px;border-radius:20px;border:1px solid var(--bd);background:transparent;color:var(--tm);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.pill.active{background:var(--acc);color:#fff;border-color:var(--acc)}
+.sr-card{background:var(--bgc);border:1px solid var(--bd);border-radius:var(--r);padding:14px;cursor:pointer;transition:border-color .2s;margin-bottom:10px}
+.sr-card:hover{border-color:var(--acc)}
+.sr-t{font-size:14px;font-weight:700;margin-bottom:4px}
+.sr-m{font-size:12px;color:var(--tm);display:flex;gap:10px;flex-wrap:wrap}
+.hidden{display:none!important}
+.empty{text-align:center;padding:28px;color:var(--tm);font-size:13px}
+.save-ok{font-size:12px;color:var(--ok);display:flex;align-items:center;gap:3px}
+.edit-label-btn{background:none;border:none;color:var(--tm);font-size:10px;cursor:pointer;padding:2px;border-radius:3px;transition:all .15s;line-height:1} /* Novo estilo para o botão de edição de label */
+.edit-label-btn:hover{background:var(--bgh);color:var(--t1)}
+.config-section-card{margin-bottom:14px;padding:18px;background:var(--bgc);border:1px solid var(--bd);border-radius:var(--r);}
+.config-section-title{font-size:14px;font-weight:700;margin-bottom:15px;display:flex;align-items:center;gap:8px;}
+.config-field-list{display:flex;flex-direction:column;gap:7px;margin-top:10px;}
+.config-field-item{background:var(--bgi);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 13px;display:flex;align-items:center;gap:10px;}
+.config-field-item-label{flex:1;font-size:13px;font-weight:600;}
+.config-field-item-actions{display:flex;gap:3px;}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+@media(max-width:768px){.sb{transform:translateX(-100%)}.main{margin-left:0}.stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<aside class="sb">
+  <div class="sb-head">
+    <div class="logo"><div class="logo-i">🏭</div>ProcesSys</div>
+    <div class="srch">
+      <span class="srch-ic">🔍</span>
+      <input type="text" id="gSearch" placeholder="Buscar linha ou fábrica..." oninput="doSearch(this.value)">
+    </div>
+  </div>
+  <div class="sb-body">
+    <div class="sb-lbl">Fábricas & Linhas</div>
+    <div id="sbTree"></div>
+  </div>
+  <div class="sb-foot">
+    <button class="btn-sb" onclick="openAddModal()">＋ Nova Fábrica / Linha</button>
+  </div>
+  <div class="sb-io">
+    <button class="btn bs" style="flex:1;font-size:11px" onclick="exportData()">⬇️ Exportar</button>
+    <label class="btn bs" style="flex:1;font-size:11px;cursor:pointer">⬆️ Importar
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    </label>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div><div class="tb-t" id="tbTitle">Gestão de Processos</div><div class="tb-s" id="tbSub">Selecione uma linha de produção</div></div>
+    <div class="tb-a" id="tbActs"></div>
+  </div>
+  <div class="content">
+    <div class="welcome" id="pgWelcome">
+      <div class="w-ico">🏭</div>
+      <div class="w-t">Bem-vindo ao ProcesSys</div>
+      <div class="w-s">Cadastre fábricas e linhas de produção para centralizar informações de processos, capacidade, receitas e equipamentos.</div>
+      <button class="btn bp" onclick="openAddModal()">＋ Adicionar Primeira Fábrica</button>
+    </div>
+    <div id="pgDetail" class="hidden">
+      <div class="stats" id="detStats"></div>
+      <div class="tab-bar" id="mainTabs"></div>
+      <div id="mainTC"></div>
+    </div>
+    <div id="pgSearch" class="hidden">
+      <div style="font-size:15px;font-weight:700;margin-bottom:14px">🔍 Resultados da Pesquisa</div>
+      <div id="srList"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: Adicionar Fábrica / Linha -->
+<div class="mo hidden" id="moAdd">
+  <div class="mo-box">
+    <div class="mo-h">
+      <div class="mo-title">➕ Nova Fábrica ou Linha</div>
+      <button class="mo-x" onclick="closeM('moAdd')">✕</button>
+    </div>
+    <div class="mo-body">
+      <div class="pills">
+        <button class="pill active" id="pf" onclick="setMode('factory')">🏭 Fábrica</button>
+        <button class="pill" id="pl" onclick="setMode('line')">⚙️ Linha</button>
+      </div>
+      <div id="frmF">
+        <div class="fld"><label>Nome da Fábrica *</label><input id="f_name" placeholder="Ex: Fábrica Central – SP"></div>
+        <div class="fld" style="margin-top:11px"><label>Localização</label><input id="f_loc" placeholder="Cidade, Estado"></div>
+        <div class="fld" style="margin-top:11px"><label>CNPJ</label><input id="f_cnpj" placeholder="00.000.000/0000-00"></div>
+        <div class="fld" style="margin-top:11px"><label>Responsável</label><input id="f_mgr" placeholder="Nome do gerente"></div>
+        <div class="fld" style="margin-top:11px"><label>Status</label>
+          <select id="f_st">
+            <option value="active">Ativa</option>
+            <option value="inactive">Inativa</option>
+            <option value="maintenance">Em Manutenção</option>
+          </select>
+        </div>
+        <div class="fld" style="margin-top:11px"><label>Observações</label><textarea id="f_obs" placeholder="Informações adicionais..."></textarea></div>
+      </div>
+      <div id="frmL" class="hidden">
+        <div class="fld"><label>Fábrica *</label><select id="l_fac"><option value="">Selecione...</option></select></div>
+        <div class="fld" style="margin-top:11px"><label>Nome da Linha *</label><input id="l_name" placeholder="Ex: Linha A – Biscoitos"></div>
+        <div class="fld" style="margin-top:11px"><label>Código</label><input id="l_code" placeholder="Ex: LA-001"></div>
+        <div class="fld" style="margin-top:11px"><label>Tipo de Produto</label><input id="l_prod" placeholder="Ex: Biscoitos, Balas, Chocolates"></div>
+        <div class="fld" style="margin-top:11px"><label>Status</label>
+          <select id="l_st">
+            <option value="active">Operando</option>
+            <option value="inactive">Parada</option>
+            <option value="maintenance">Em Manutenção</option>
+          </select>
+        </div>
+        <div class="fld" style="margin-top:11px"><label>Turno(s)</label><input id="l_shifts" placeholder="Ex: 3 turnos — 06h/14h/22h"></div>
+      </div>
+    </div>
+    <div class="mo-foot">
+      <button class="btn bs" onclick="closeM('moAdd')">Cancelar</button>
+      <button class="btn bp" onclick="saveAdd()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Editar Linha -->
+<div class="mo hidden" id="moEdit">
+  <div class="mo-box">
+    <div class="mo-h">
+      <div class="mo-title">✏️ Editar Linha</div>
+      <button class="mo-x" onclick="closeM('moEdit')">✕</button>
+    </div>
+    <div class="mo-body">
+      <div class="fld"><label>Nome *</label><input id="el_name"></div>
+      <div class="fld"><label>Código</label><input id="el_code"></div>
+      <div class="fld"><label>Tipo de Produto</label><input id="el_prod"></div>
+      <div class="fld"><label>Status</label>
+        <select id="el_st">
+          <option value="active">Operando</option>
+          <option value="inactive">Parada</option>
+          <option value="maintenance">Em Manutenção</option>
+        </select>
+      </div>
+      <div class="fld"><label>Turno(s)</label><input id="el_shifts"></div>
+    </div>
+    <div class="mo-foot">
+      <button class="btn bs" onclick="closeM('moEdit')">Cancelar</button>
+      <button class="btn bp" onclick="saveEdit()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Receita -->
+<div class="mo hidden" id="moRec">
+  <div class="mo-box">
+    <div class="mo-h">
+      <div class="mo-title" id="moRecT">📋 Receita</div>
+      <button class="mo-x" onclick="closeM('moRec')">✕</button>
+    </div>
+    <div class="mo-body">
+      <div class="fld"><label>Nome *</label><input id="rec_name" placeholder="Ex: Biscoito Amanteigado Tradicional"></div>
+      <div class="fg2">
+        <div class="fld"><label>Código</label><input id="rec_code" placeholder="REC-001"></div>
+        <div class="fld"><label>Versão</label><input id="rec_ver" placeholder="v1.0"></div>
+      </div>
+      <div class="fg2">
+        <div class="fld"><label>Rendimento (kg/lote)</label><input id="rec_yield" placeholder="Ex: 750"></div>
+        <div class="fld"><label>Tempo de Processo</label><input id="rec_time" placeholder="Ex: 45 min"></div>
+      </div>
+      <div class="fld"><label>Status</label>
+        <select id="rec_st">
+          <option>Ativa</option>
+          <option>Em Revisão</option>
+          <option>Descontinuada</option>
+        </select>
+      </div>
+      <div class="fld"><label>Observações / Ingredientes Chave</label>
+        <textarea id="rec_obs" placeholder="Ingredientes, parâmetros críticos..."></textarea>
+      </div>
+    </div>
+    <div class="mo-foot">
+      <button class="btn bs" onclick="closeM('moRec')">Cancelar</button>
+      <button class="btn bp" onclick="saveRec()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Equipamento -->
+<div class="mo hidden" id="moEq">
+  <div class="mo-box wide">
+    <div class="mo-h">
+      <div class="mo-title" id="moEqT">🔩 Equipamento</div>
+      <button class="mo-x" onclick="closeM('moEq')">✕</button>
+    </div>
+    <div class="mo-body">
+      <div class="fg2">
+        <div class="fld"><label>Nome *</label><input id="eq_name" placeholder="Ex: Túnel de Resfriamento"></div>
+        <div class="fld"><label>Modelo</label><input id="eq_model" placeholder="Ex: CT-900"></div>
+      </div>
+      <div class="fg2">
+        <div class="fld"><label>Fabricante</label><input id="eq_maker" placeholder="Ex: Sollich"></div>
+        <div class="fld"><label>Ano de Fabricação</label><input id="eq_year" placeholder="Ex: 2020"></div>
+      </div>
+      <div class="fg2">
+        <div class="fld"><label>Nº de Série</label><input id="eq_serial" placeholder="SN-456789"></div>
+        <div class="fld"><label>TAG / Patrimônio</label><input id="eq_tag" placeholder="EQ-0042"></div>
+      </div>
+      <div class="fg2">
+        <div class="fld"><label>Capacidade</label><input id="eq_cap" placeholder="Ex: 1.200 kg/h"></div>
+        <div class="fld"><label>Potência (kW)</label><input id="eq_kw" placeholder="Ex: 22"></div>
+      </div>
+      <div class="fg2">
+        <div class="fld"><label>Última Manutenção</label><input type="date" id="eq_lm"></div>
+        <div class="fld"><label>Próxima Manutenção</label><input type="date" id="eq_nm"></div>
+      </div>
+      <div class="fld"><label>Status</label>
+        <select id="eq_st">
+          <option>Operacional</option>
+          <option>Em Manutenção</option>
+          <option>Parado</option>
+          <option>Em Standby</option>
+        </select>
+      </div>
+      <div class="fld"><label>Observações Técnicas</label>
+        <textarea id="eq_obs" placeholder="Histórico de falhas, fornecedor de peças..."></textarea>
+      </div>
+    </div>
+    <div class="mo-foot">
+      <button class="btn bs" onclick="closeM('moEq')">Cancelar</button>
+      <button class="btn bp" onclick="saveEq()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Editar Título do Campo (já existente) -->
+<div class="mo hidden" id="moEditLabel">
+  <div class="mo-box">
+    <div class="mo-h">
+      <div class="mo-title">✏️ Editar Título do Campo</div>
+      <button class="mo-x" onclick="closeM('moEditLabel')">✕</button>
+    </div>
+    <div class="mo-body">
+      <div class="fld">
+        <label>Novo Título</label>
+        <input id="editLabelInput" type="text" placeholder="Ex: Temperatura de Processo">
+      </div>
+    </div>
+    <div class="mo-foot">
+      <button class="btn bs" onclick="closeM('moEditLabel')">Cancelar</button>
+      <button class="btn bp" onclick="saveEditedLabel()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOVO MODAL: Adicionar/Editar Campo Dinâmico -->
+<div class="mo hidden" id="moManageField">
+  <div class="mo-box">
+    <div class="mo-h">
+      <div class="mo-title" id="moManageFieldTitle">➕ Novo Campo</div>
+      <button class="mo-x" onclick="closeM('moManageField')">✕</button>
+    </div>
+    <div class="mo-body">
+      <div class="fld"><label>Título do Campo *</label><input id="mf_label" placeholder="Ex: Umidade Relativa"></div>
+      <div class="fld" style="margin-top:11px"><label>ID do Campo (único) *</label><input id="mf_id" placeholder="Ex: umidadeRelativa" oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')"></div>
+      <div class="fld" style="margin-top:11px"><label>Tipo de Campo</label>
+        <select id="mf_type">
+          <option value="text">Texto Curto</option>
+          <option value="textarea">Texto Longo</option>
+          <option value="number">Número</option>
+          <option value="date">Data</option>
+        </select>
+      </div>
+      <div class="fld" style="margin-top:11px"><label>Placeholder</label><input id="mf_ph" placeholder="Ex: 60%"></div>
+      <div class="fld" style="margin-top:11px"><label>Campo de Largura Total?</label>
+        <select id="mf_full">
+          <option value="false">Não</option>
+          <option value="true">Sim (para Textos Longos)</option>
+        </select>
+      </div>
+    </div>
+    <div class="mo-foot">
+      <button class="btn bs" onclick="closeM('moManageField')">Cancelar</button>
+      <button class="btn bp" onclick="saveManagedField()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══ STORAGE ══
+const KEY='processys_v8'; // Alterado para v8 para forçar nova estrutura de dados com config
+function load(){
+  try{
+    let data = JSON.parse(localStorage.getItem(KEY)) || {f:[],l:[],config:null};
+    // Se a configuração não existir ou for de uma versão antiga, inicializa com a padrão
+    if (!data.config || !data.config.kit || !data.config.kit.proc || !data.config.kit.proc[0].id) {
+      data.config = getDefaultConfig();
+    }
+    return data;
+  }catch{
+    return {f:[],l:[],config:getDefaultConfig()};
+  }
+}
+function persist(){localStorage.setItem(KEY,JSON.stringify(db));}
+let db=load();
+let curId=null,addMode='factory',recCtx=null,eqCtx=null,saveTimer=null;
+let currentEditLabelContext = null; // Contexto para edição de label
+let currentManageFieldContext = null; // Novo contexto para adicionar/editar campos
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+
+// Nova função para obter a configuração padrão dos campos
+function getDefaultConfig() {
+  return {
+    kit:{
+      proc:[
+        {id:'temp',label:'Temperatura (°C)',type:'text',ph:'Ex: 85°C'},
+        {id:'pres',label:'Pressão (bar)',type:'text',ph:'Ex: 2.5 bar'},
+        {id:'hum',label:'Umidade (%)',type:'text',ph:'Ex: 65%'},
+        {id:'ph',label:'pH',type:'text',ph:'Ex: 5.5 – 6.0'},
+        {id:'brix',label:'Brix (°Bx)',type:'text',ph:'Ex: 72 °Bx'},
+        {id:'visc',label:'Viscosidade (cP)',type:'text',ph:'Ex: 1200 cP'},
+        {id:'tCook',label:'Tempo de Cozimento',type:'text',ph:'Ex: 45 min'},
+        {id:'tCool',label:'Tempo de Resfriamento',type:'text',ph:'Ex: 20 min'},
+        {id:'desc',label:'Descrição / Fluxo do Processo',type:'textarea',ph:'Descreva o fluxo completo...', full:true},
+        {id:'notes',label:'Observações Técnicas',type:'textarea',ph:'Parâmetros críticos, pontos de controle...', full:true}
+      ],
+      cap:[
+        {id:'dailyKg',label:'Capacidade Diária (kg/dia)',type:'text',ph:'Ex: 12.000'},
+        {id:'hourlyKg',label:'Capacidade Horária (kg/h)',type:'text',ph:'Ex: 500'},
+        {id:'batchKg',label:'Tamanho do Lote (kg)',type:'text',ph:'Ex: 800'},
+        {id:'batchDay',label:'Lotes por Dia',type:'text',ph:'Ex: 15'},
+        {id:'waste',label:'Perda / Descarte (%)',type:'text',ph:'Ex: 3%'},
+        {id:'rend',label:'Rendimento (%)',type:'text',ph:'Ex: 97%'},
+        {id:'notes',label:'Observações',type:'textarea',ph:'Restrições, gargalos...', full:true}
+      ],
+      spd:[
+        {id:'mpm',label:'Velocidade Linear (m/min)',type:'text',ph:'Ex: 18 m/min'},
+        {id:'uph',label:'Unidades por Hora',type:'text',ph:'Ex: 3.600'},
+        {id:'cycle',label:'Tempo de Ciclo (s)',type:'text',ph:'Ex: 1.0 s'},
+        {id:'downtime',label:'Downtime Médio (%)',type:'text',ph:'Ex: 5%'},
+        {id:'oee',label:'OEE (%)',type:'text',ph:'Ex: 82%'},
+        {id:'notes',label:'Observações',type:'textarea',ph:'Fatores que impactam a velocidade...', full:true}
+      ],
+      extra:[
+        {id:'cert',label:'Certificação / SIF',type:'text',ph:'Ex: SIF 1234, HALAL'},
+        {id:'audit',label:'Última Auditoria',type:'date',ph:''},
+        {id:'maint',label:'Próxima Manutenção',type:'date',ph:''},
+        {id:'water',label:'Consumo Água (m³/dia)',type:'text',ph:'Ex: 45'},
+        {id:'energy',label:'Consumo Energia (kWh/dia)',type:'text',ph:'Ex: 1.200'},
+        {id:'steam',label:'Consumo Vapor (kg/h)',type:'text',ph:'Ex: 300'},
+        {id:'cleanP',label:'Protocolo de Limpeza',type:'text',ph:'Ex: CIP 3 etapas'},
+        {id:'sanit',label:'Agente Sanitizante',type:'text',ph:'Ex: Cloro 200 ppm'},
+        {id:'cleanF',label:'Frequência de Higienização',type:'text',ph:'Ex: A cada 8h'},
+        {id:'notes',label:'Observações Gerais',type:'textarea',ph:'Informações relevantes não listadas...', full:true}
+      ]
+    },
+    pkg:{
+      proc:[
+        {id:'tipo',label:'Tipo de Embalagem',type:'text',ph:'Ex: Flow-pack, Doypack'},
+        {id:'tSeal',label:'Temp. Selagem (°C)',type:'text',ph:'Ex: 140°C'},
+        {id:'tSealT',label:'Tempo Selagem (ms)',type:'text',ph:'Ex: 300 ms'},
+        {id:'gas',label:'Gás Inerte / MAP',type:'text',ph:'Ex: N₂ 100%'},
+        {id:'vac',label:'Vácuo (mbar)',type:'text',ph:'Ex: -900 mbar'},
+        {id:'print',label:'Sistema de Impressão',type:'text',ph:'Ex: Inkjet Markem'},
+        {id:'coding',label:'Padrão Codificação',type:'text',ph:'Ex: DD/MM/AA HH:MM'},
+        {id:'label',label:'Sistema de Rotulagem',type:'text',ph:'Ex: Auto-adesivo'},
+        {id:'notes',label:'Observações',type:'textarea',ph:'Parâmetros críticos...', full:true}
+      ],
+      cap:[
+        {id:'uph',label:'Unidades por Hora',type:'text',ph:'Ex: 6.000'},
+        {id:'kph',label:'kg por Hora',type:'text',ph:'Ex: 350'},
+        {id:'pallets',label:'Pallets por Dia',type:'text',ph:'Ex: 24'},
+        {id:'boxes',label:'Caixas por Hora',type:'text',ph:'Ex: 200'},
+        {id:'notes',label:'Observações',type:'textarea',ph:'', full:true}
+      ],
+      spd:[
+        {id:'mpm',label:'Velocidade Filme (m/min)',type:'text',ph:'Ex: 40 m/min'},
+        {id:'cycle',label:'Tempo de Ciclo (s)',type:'text',ph:'Ex: 0.6 s'},
+        {id:'idx',label:'Tempo de Indexação (ms)',type:'text',ph:'Ex: 150 ms'},
+        {id:'film',label:'Consumo Filme (m/h)',type:'text',ph:'Ex: 2.400'},
+        {id:'notes',label:'Observações',type:'textarea',ph:'', full:true}
+      ],
+      extra:[
+        {id:'filmT',label:'Tipo de Filme',type:'text',ph:'Ex: BOPP metalizado 20µm'},
+        {id:'filmS',label:'Fornecedor do Filme',type:'text',ph:'Ex: Bemis, Sealed Air'},
+        {id:'lid',label:'Material da Tampa',type:'text',ph:'Ex: Alumínio 40µm'},
+        {id:'labelT',label:'Tipo de Rótulo',type:'text',ph:'Ex: PP Branco'},
+        {id:'ink',label:'Tipo de Tinta',type:'text',ph:'Ex: Flexografia UV'},
+        {id:'pallP',label:'Padrão Paletização',type:'text',ph:'Ex: Bloco 5x4 — 10 cam.'},
+        {id:'stretch',label:'Filme Stretch',type:'text',ph:'Ex: 20µm 300%'},
+        {id:'box',label:'Tipo de Caixa',type:'text',ph:'Ex: RSC dupla parede'},
+        {id:'notes',label:'Observações',type:'textarea',ph:'', full:true}
+      ]
+    },
+    oth:{
+      qual:[
+        {id:'hazard',label:'Análise de Perigos (HACCP)',type:'text',ph:'Ex: Biológico, Químico, Físico'},
+        {id:'pcc',label:'Pontos Críticos (PCCs)',type:'text',ph:'Ex: PCC1-Temp, PCC2-Metal Detector'},
+        {id:'freq',label:'Frequência Verificações',type:'text',ph:'Ex: A cada 2h'},
+        {id:'micro',label:'Análises Microbiológicas',type:'text',ph:'Ex: Coliformes, Salmonela'},
+        {id:'fisico',label:'Análises Físico-Químicas',type:'text',ph:'Ex: Umidade, Aw, pH'},
+        {id:'org',label:'Análises Organolépticas',type:'text',ph:'Ex: Cor, Odor, Textura'},
+        {id:'rej',label:'Critérios de Rejeição',type:'text',ph:'Ex: Umidade > 4%'},
+        {id:'notes',label:'Observações',type:'textarea',ph:'', full:true}
+      ],
+      log:[
+        {id:'tMin',label:'Temp. Mín. Armazenamento',type:'text',ph:'Ex: 15°C'},
+        {id:'tMax',label:'Temp. Máx. Armazenamento',type:'text',ph:'Ex: 25°C'},
+        {id:'vida',label:'Vida de Prateleira',type:'text',ph:'Ex: 12 meses'},
+        {id:'arm',label:'Cap. Armazém (ton)',type:'text',ph:'Ex: 500 ton'},
+        {id:'exp',label:'Cap. Expedição (pallets/dia)',type:'text',ph:'Ex: 80 pallets'},
+        {id:'frio',label:'Cadeia Fria Requerida',type:'text',ph:'Ex: Sim — 2°C a 8°C'},
+        {id:'notes',label:'Observações',type:'textarea',ph:'', full:true}
+      ],
+      sus:[
+        {id:'energy',label:'Eficiência Energética',type:'text',ph:'Ex: 82%'},
+        {id:'water',label:'Reciclagem de Água (%)',type:'text',ph:'Ex: 40%'},
+        {id:'solid',label:'Resíduo Sólido (kg/dia)',type:'text',ph:'Ex: 120 kg'},
+        {id:'co2',label:'Pegada de CO₂ (t/mês)',type:'text',ph:'Ex: 3.5 t'},
+        {id:'certs',label:'Certificações Ambientais',type:'text',ph:'Ex: ISO 14001'},
+        {id:'notes',label:'Observações',type:'textarea',ph:'', full:true}
+      ],
+      saf:[
+        {id:'norms',label:'Normas Aplicáveis',type:'text',ph:'Ex: NR-12, NR-17, NR-35'},
+        {id:'epi',label:'EPIs Obrigatórios',type:'text',ph:'Ex: Protetor auricular, óculos'},
+        {id:'ergo',label:'Riscos Ergonômicos',type:'text',ph:'Ex: Repetitividade, postura'},
+        {id:'emerg',label:'Contatos de Emergência',type:'text',ph:'Ex: SESMT (11) 9999-9999'},
+        {id:'train',label:'Frequência Treinamentos',type:'text',ph:'Ex: Semestral'},
+        {id:'notes',label:'Observações',type:'textarea',ph:'', full:true}
+      ]
+    }
+  };
+}
+
+function mkLine(fid,name,code,prod,status,shifts){
+  // Inicializa os valores dos campos com base na configuração padrão
+  const initialValues = {};
+  function populateValues(configSection, targetObject) {
+    for (const key in configSection) {
+      if (Array.isArray(configSection[key])) { // É uma lista de campos
+        targetObject[key] = {};
+        configSection[key].forEach(field => {
+          targetObject[key][field.id] = ''; // Valor inicial vazio
+        });
+      } else if (typeof configSection[key] === 'object') { // É um sub-objeto
+        targetObject[key] = {};
+        populateValues(configSection[key], targetObject[key]);
+      }
+    }
+  }
+  populateValues(db.config, initialValues);
+
+  return{id:uid(),fid,name,code,prod,status,shifts,
+    kit:{
+      proc: initialValues.kit.proc,
+      cap: initialValues.kit.cap,
+      spd: initialValues.kit.spd,
+      recipes:[],equip:[],
+      extra: initialValues.kit.extra
+    },
+    pkg:{
+      proc: initialValues.pkg.proc,
+      cap: initialValues.pkg.cap,
+      spd: initialValues.pkg.spd,
+      recipes:[],equip:[],
+      extra: initialValues.pkg.extra
+    },
+    oth:{
+      qual: initialValues.oth.qual,
+      log: initialValues.oth.log,
+      sus: initialValues.oth.sus,
+      saf: initialValues.oth.saf
+    }
+  };
+}
+
+// ══ UTILS ══
+function esc(s){return String(s||'').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'&quot;');}
+function $(id){return document.getElementById(id);}
+function show(id){$(id).classList.remove('hidden');}
+function hide(id){$(id).classList.add('hidden');}
+function closeM(id){hide(id);}
+function showPage(id){['pgWelcome','pgDetail','pgSearch'].forEach(hide);show(id);}
+function val(id){return $(id)?$(id).value:'';}
+function setVal(id,v){const e=$(id);if(e)e.value=v||'';}
+
+// ══ SIDEBAR ══
+function renderSB(){
+  const t=$('sbTree');
+  if(!db.f.length){t.innerHTML='<div class="empty">Nenhuma fábrica cadastrada ainda.</div>';return;}
+  t.innerHTML=db.f.map(fac=>{
+    const lines=db.l.filter(l=>l.fid===fac.id);
+    const dc=fac.status==='active'?'d-ok':fac.status==='inactive'?'d-err':'d-warn';
+    const rows=lines.length
+      ?lines.map(l=>`<div class="ln-row${l.id===curId?' active':''}" id="lr-${l.id}" onclick="openLine('${l.id}')">
+          <span class="dot ${l.status==='active'?'d-ok':l.status==='inactive'?'d-err':'d-warn'}"></span>${esc(l.name)}
+        </div>`).join('')
+      :'<div style="padding:5px 8px;font-size:12px;color:var(--tm);font-style:italic">Sem linhas cadastradas</div>';
+    return`<div class="fac-wrap">
+      <div class="fac-row" id="fr-${fac.id}">
+        <div class="fac-l" onclick="toggleFac('${fac.id}')">
+          <span class="dot ${dc}"></span>🏭 ${esc(fac.name)}
+        </div>
+        <div class="fac-actions">
+          <button class="ib d" onclick="deleteFactory('${fac.id}')" title="Excluir Fábrica">🗑</button>
+          <span class="chev" id="ch-${fac.id}" onclick="toggleFac('${fac.id}')">▶</span>
+        </div>
+      </div>
+      <div class="line-list" id="ll-${fac.id}">${rows}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleFac(fid){
+  const ll=$('ll-'+fid),ch=$('ch-'+fid);
+  const open=ll.style.display==='block';
+  ll.style.display=open?'none':'block';
+  ch.style.transform=open?'rotate(0deg)':'rotate(90deg)';
+}
+
+// ══ MODAL ADD ══
+function openAddModal(){
+  addMode='factory';
+  $('pf').classList.add('active');$('pl').classList.remove('active');
+  show('frmF');hide('frmL');
+  ['f_name','f_loc','f_cnpj','f_mgr','f_obs'].forEach(id=>setVal(id,''));
+  setVal('f_st','active');
+  show('moAdd');
+}
+
+function setMode(m){
+  addMode=m;
+  $('pf').classList.toggle('active',m==='factory');
+  $('pl').classList.toggle('active',m==='line');
+  if(m==='factory'){show('frmF');hide('frmL');}
+  else{
+    hide('frmF');show('frmL');
+    $('l_fac').innerHTML='<option value="">Selecione...</option>'+
+      db.f.map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join('');
+    ['l_name','l_code','l_prod','l_shifts'].forEach(id=>setVal(id,''));
+    setVal('l_st','active');
+  }
+}
+
+function saveAdd(){
+  if(addMode==='factory'){
+    const name=val('f_name').trim();
+    if(!name){alert('Informe o nome da fábrica.');return;}
+    db.f.push({id:uid(),name,
+      loc:val('f_loc').trim(),cnpj:val('f_cnpj').trim(),
+      mgr:val('f_mgr').trim(),status:val('f_st'),obs:val('f_obs').trim()});
+  }else{
+    const fid=val('l_fac'),name=val('l_name').trim();
+    if(!fid){alert('Selecione a fábrica.');return;}
+    if(!name){alert('Informe o nome da linha.');return;}
+    db.l.push(mkLine(fid,name,
+      val('l_code').trim(),val('l_prod').trim(),
+      val('l_st'),val('l_shifts').trim()));
+  }
+  persist();closeM('moAdd');renderSB();
+}
+
+// ══ OPEN / EDIT / DELETE LINE / DELETE FACTORY ══
+function openLine(id){
+  curId=id;renderSB();
+  const L=db.l.find(l=>l.id===id);
+  const Fac=db.f.find(f=>f.id===L.fid);
+  $('tbTitle').textContent=L.name;
+  $('tbSub').textContent=[Fac.name,L.code,L.prod].filter(Boolean).join(' · ');
+  $('tbActs').innerHTML=`<span id="saveOk" class="save-ok hidden">✓ Salvo</span>
+    <button class="btn bs bsm" onclick="openEditLine()">✏️ Editar</button>
+    <button class="btn bd2 bsm" onclick="deleteLine()">🗑 Excluir</button>`;
+  showPage('pgDetail');
+  renderDetail(L);
+}
+
+function openEditLine(){
+  const L=db.l.find(l=>l.id===curId);
+  setVal('el_name',L.name);setVal('el_code',L.code);
+  setVal('el_prod',L.prod);setVal('el_st',L.status);setVal('el_shifts',L.shifts);
+  show('moEdit');
+}
+
+function saveEdit(){
+  const L=db.l.find(l=>l.id===curId);
+  const name=val('el_name').trim();
+  if(!name){alert('Informe o nome da linha.');return;}
+  L.name=name;L.code=val('el_code').trim();
+  L.prod=val('el_prod').trim();L.status=val('el_st');L.shifts=val('el_shifts').trim();
+  persist();closeM('moEdit');openLine(curId);
+}
+
+function deleteLine(){
+  const L=db.l.find(l=>l.id===curId);
+  if(!confirm(`Excluir a linha "${L.name}"? Esta ação não pode ser desfeita.`))return;
+  db.l=db.l.filter(l=>l.id!==curId);
+  curId=null;persist();renderSB();
+  $('tbTitle').textContent='Gestão de Processos';
+  $('tbSub').textContent='Selecione uma linha de produção';
+  $('tbActs').innerHTML='';
+  showPage('pgWelcome');
+}
+
+function deleteFactory(fid){
+  const factory = db.f.find(f => f.id === fid);
+  if (!factory) return;
+
+  if (!confirm(`Tem certeza que deseja excluir a fábrica "${factory.name}"? Isso também excluirá TODAS as linhas e dados associados a ela. Esta ação não pode ser desfeita.`)) {
+    return;
+  }
+
+  // Remove a fábrica
+  db.f = db.f.filter(f => f.id !== fid);
+
+  // Remove todas as linhas associadas a esta fábrica
+  const linesToDelete = db.l.filter(l => l.fid === fid).map(l => l.id);
+  db.l = db.l.filter(l => l.fid !== fid);
+
+  // Se a linha atualmente selecionada pertencia à fábrica excluída, resetamos a visualização
+  if (curId && linesToDelete.includes(curId)) {
+    curId = null;
+    $('tbTitle').textContent = 'Gestão de Processos';
+    $('tbSub').textContent = 'Selecione uma linha de produção';
+    $('tbActs').innerHTML = '';
+    showPage('pgWelcome');
+  }
+
+  persist();
+  renderSB(); // Re-renderiza a sidebar para refletir as mudanças
+}
+
+// ══ RENDER DETAIL ══
+function renderDetail(L){
+  updateStats(L);
+  // Adicionando a nova aba de Configurações
+  const mts=[
+    {id:'kit',l:'🍳 Cozinha'},
+    {id:'pkg',l:'📦 Embalagem'},
+    {id:'oth',l:'🔧 Outras Informações'},
+    {id:'config',l:'⚙️ Configurações'} // Nova aba
+  ];
+  $('mainTabs').innerHTML=mts.map((t,i)=>
+    `<button class="tb${i===0?' active':''}" id="mt-${t.id}" onclick="switchMain('${t.id}')">${t.l}</button>`
+  ).join('');
+  $('mainTC').innerHTML=mts.map((t,i)=>
+    `<div class="tc${i===0?' active':''}" id="tc-${t.id}">${buildST(t.id,L)}</div>`
+  ).join('');
+}
+
+function updateStats(L){
+  const sl={active:'Operando',inactive:'Parada',maintenance:'Manutenção'};
+  const sc={active:'tg',inactive:'tr',maintenance:'to'};
+  $('detStats').innerHTML=`
+    <div class="sc"><div class="sc-l">Status</div>
+      <div class="sc-v" style="font-size:14px;margin-top:5px">
+        <span class="tag ${sc[L.status]}">${sl[L.status]}</span></div></div>
+    <div class="sc"><div class="sc-l">Cap. Diária Cozinha</div>
+      <div class="sc-v">${L.kit.cap.dailyKg||'—'}</div>
+      <div class="sc-s">kg/dia</div></div>
+    <div class="sc"><div class="sc-l">Receitas</div>
+      <div class="sc-v">${L.kit.recipes.length+L.pkg.recipes.length}</div>
+      <div class="sc-s">cadastradas</div></div>
+    <div class="sc"><div class="sc-l">Equipamentos</div>
+      <div class="sc-v">${L.kit.equip.length+L.pkg.equip.length}</div>
+      <div class="sc-s">cadastrados</div></div>`;
+}
+
+function switchMain(id){
+  document.querySelectorAll('#mainTabs .tb').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#mainTC .tc').forEach(c=>c.classList.remove('active'));
+  $('mt-'+id).classList.add('active');$('tc-'+id).classList.add('active');
+}
+
+// ══ SECTION TABS ══
+const stDefs={
+  kit:[{id:'proc',l:'⚙️ Processo'},{id:'cap',l:'📊 Capacidade'},{id:'spd',l:'⚡ Velocidade'},
+       {id:'recipes',l:'📋 Receitas'},{id:'equip',l:'🔩 Equipamentos'},{id:'extra',l:'🧪 Mais Info'}],
+  pkg:[{id:'proc',l:'⚙️ Processo'},{id:'cap',l:'📊 Capacidade'},{id:'spd',l:'⚡ Velocidade'},
+       {id:'recipes',l:'📋 Formulações'},{id:'equip',l:'🔩 Equipamentos'},{id:'extra',l:'📦 Materiais'}],
+  oth:[{id:'qual',l:'✅ Qualidade'},{id:'log',l:'🚚 Logística'},
+       {id:'sus',l:'🌿 Sustentabilidade'},{id:'saf',l:'🦺 Segurança'}],
+  config:[ // Nova seção de configuração
+    {id:'kit_proc',l:'🍳 Cozinha - Processo'},
+    {id:'kit_cap',l:'🍳 Cozinha - Capacidade'},
+    {id:'kit_spd',l:'🍳 Cozinha - Velocidade'},
+    {id:'kit_extra',l:'🍳 Cozinha - Mais Info'},
+    {id:'pkg_proc',l:'📦 Embalagem - Processo'},
+    {id:'pkg_cap',l:'📦 Embalagem - Capacidade'},
+    {id:'pkg_spd',l:'📦 Embalagem - Velocidade'},
+    {id:'pkg_extra',l:'📦 Embalagem - Materiais'},
+    {id:'oth_qual',l:'🔧 Outras - Qualidade'},
+    {id:'oth_log',l:'🔧 Outras - Logística'},
+    {id:'oth_sus',l:'🔧 Outras - Sustentabilidade'},
+    {id:'oth_saf',l:'🔧 Outras - Segurança'}
+  ]
+};
+
+function buildST(main,L){
+  const tabs=stDefs[main];
+  return`<div class="sec-tabs" id="stb-${main}">
+    ${tabs.map((t,i)=>`<button class="st${i===0?' active':''}" id="st-${main}-${t.id}" onclick="switchST('${main}','${t.id}')">${t.l}</button>`).join('')}
+  </div>
+  <div id="sc-${main}">${renderSec(main,tabs[0].id,L)}</div>`;
+}
+
+function switchST(main,sec){
+  const L=db.l.find(l=>l.id===curId);
+  document.querySelectorAll(`#stb-${main} .st`).forEach(b=>b.classList.remove('active'));
+  $(`st-${main}-${sec}`).classList.add('active');
+  $(`sc-${main}`).innerHTML=renderSec(main,sec,L);
+}
+
+function renderSec(main,sec,L){
+  // Mapeia as funções de renderização para cada seção
+  const m={
+    kit:{
+      proc:()=>renderDynamicFields(L, 'kit', 'proc'),
+      cap:()=>renderDynamicFields(L, 'kit', 'cap'),
+      spd:()=>renderDynamicFields(L, 'kit', 'spd'),
+      recipes:()=>recList(L,'kit'),
+      equip:()=>eqList(L,'kit'),
+      extra:()=>renderDynamicFields(L, 'kit', 'extra')
+    },
+    pkg:{
+      proc:()=>renderDynamicFields(L, 'pkg', 'proc'),
+      cap:()=>renderDynamicFields(L, 'pkg', 'cap'),
+      spd:()=>renderDynamicFields(L, 'pkg', 'spd'),
+      recipes:()=>recList(L,'pkg'),
+      equip:()=>eqList(L,'pkg'),
+      extra:()=>renderDynamicFields(L, 'pkg', 'extra')
+    },
+    oth:{
+      qual:()=>renderDynamicFields(L, 'oth', 'qual'),
+      log:()=>renderDynamicFields(L, 'oth', 'log'),
+      sus:()=>renderDynamicFields(L, 'oth', 'sus'),
+      saf:()=>renderDynamicFields(L, 'oth', 'saf')
+    },
+    config:{ // Nova função para renderizar a gestão de campos
+      kit_proc:()=>renderConfigManagement('kit','proc','🍳 Cozinha - Processo'),
+      kit_cap:()=>renderConfigManagement('kit','cap','🍳 Cozinha - Capacidade'),
+      kit_spd:()=>renderConfigManagement('kit','spd','🍳 Cozinha - Velocidade'),
+      kit_extra:()=>renderConfigManagement('kit','extra','🍳 Cozinha - Mais Info'),
+      pkg_proc:()=>renderConfigManagement('pkg','proc','📦 Embalagem - Processo'),
+      pkg_cap:()=>renderConfigManagement('pkg','cap','📦 Embalagem - Capacidade'),
+      pkg_spd:()=>renderConfigManagement('pkg','spd','📦 Embalagem - Velocidade'),
+      pkg_extra:()=>renderConfigManagement('pkg','extra','📦 Embalagem - Materiais'),
+      oth_qual:()=>renderConfigManagement('oth','qual','🔧 Outras - Qualidade'),
+      oth_log:()=>renderConfigManagement('oth','log','🚚 Outras - Logística'),
+      oth_sus:()=>renderConfigManagement('oth','sus','🌿 Outras - Sustentabilidade'),
+      oth_saf:()=>renderConfigManagement('oth','saf','🦺 Outras - Segurança')
+    }
+  };
+  return m[main][sec]();
+}
+
+// ══ AUTO SAVE ══
+function AS(elId,path){
+  const el=$(elId);if(!el)return;
+  const L=db.l.find(l=>l.id===curId);if(!L)return;
+  const keys=path.split('.');let obj=L;
+  for(let i=0;i<keys.length-1;i++)obj=obj[keys[i]];
+  obj[keys[keys.length-1]]=el.value;
+  persist();updateStats(L);
+  clearTimeout(saveTimer);
+  const ok=$('saveOk');
+  if(ok){ok.classList.remove('hidden');saveTimer=setTimeout(()=>ok.classList.add('hidden'),2000);}
+}
+
+// ══ FIELD BUILDERS (AGORA DINÂMICOS) ══
+function renderDynamicFields(L, mainSection, subSection) {
+  const fieldsConfig = db.config[mainSection][subSection];
+  const currentValues = L[mainSection][subSection];
+  const titleMap = {
+    kit: {proc:'⚙️ Processo — Cozinha', cap:'📊 Capacidade — Cozinha', spd:'⚡ Velocidade — Cozinha', extra:'🧪 Informações Complementares — Cozinha'},
+    pkg: {proc:'⚙️ Processo — Embalagem', cap:'📊 Capacidade — Embalagem', spd:'⚡ Velocidade — Embalagem', extra:'📦 Materiais de Embalagem'},
+    oth: {qual:'✅ Qualidade & Controle', log:'🚚 Logística & Armazenagem', sus:'🌿 Sustentabilidade', saf:'🦺 Segurança do Trabalho'}
+  };
+  const cardTitle = titleMap[mainSection][subSection];
+
+  let htmlFields = '';
+  let fgFields = []; // Para campos que vão no fg (grid)
+  let fullFields = []; // Para campos full (textarea)
+
+  fieldsConfig.forEach(field => {
+    const path = `${mainSection}.${subSection}.${field.id}`;
+    const value = currentValues[field.id] || '';
+    const fieldHtml = field.type === 'textarea'
+      ? FT(field.label, field.id, path, value, field.ph, mainSection, subSection)
+      : F(field.label, field.id, path, value, field.type, field.ph, mainSection, subSection);
+
+    if (field.full) {
+      fullFields.push(fieldHtml);
+    } else {
+      fgFields.push(fieldHtml);
+    }
+  });
+
+  if (fgFields.length > 0) {
+    htmlFields += `<div class="fg">${fgFields.join('')}</div>`;
+  }
+  if (fullFields.length > 0) {
+    if (fgFields.length > 0) htmlFields += `<hr class="dv">`;
+    htmlFields += fullFields.join('');
+  }
+
+  return `<div class="card"><div class="ct">${cardTitle}</div>${htmlFields}</div>`;
+}
+
+
+function F(lbl, id, path, v, type, ph, mainSection, subSection){
+  type=type||'text';ph=ph||'';
+  return`<div class="fld">
+    <label>${lbl} <button class="edit-label-btn" onclick="openEditLabelModal('${mainSection}','${subSection}','${id}')">✏️</button></label>
+    <input type="${type}" id="${id}" value="${esc(v)}" placeholder="${ph}" oninput="AS('${id}','${path}')">
+  </div>`;
+}
+function FT(lbl, id, path, v, ph, mainSection, subSection){
+  ph=ph||'';
+  return`<div class="fld full">
+    <label>${lbl} <button class="edit-label-btn" onclick="openEditLabelModal('${mainSection}','${subSection}','${id}')">✏️</button></label>
+    <textarea id="${id}" placeholder="${ph}" oninput="AS('${id}','${path}')">${esc(v)}</textarea>
+  </div>`;
+}
+
+// ══ MODAL: EDITAR LABEL ══
+function openEditLabelModal(mainSection, subSection, fieldId) {
+  currentEditLabelContext = { mainSection, subSection, fieldId };
+  const fieldConfig = db.config[mainSection][subSection].find(f => f.id === fieldId);
+  if (fieldConfig) {
+    setVal('editLabelInput', fieldConfig.label);
+    show('moEditLabel');
+  }
+}
+
+function saveEditedLabel() {
+  if (!currentEditLabelContext) return;
+  const newLabel = val('editLabelInput').trim();
+  if (!newLabel) {
+    alert('O título não pode ser vazio.');
+    return;
+  }
+
+  const { mainSection, subSection, fieldId } = currentEditLabelContext;
+  const fieldConfig = db.config[mainSection][subSection].find(f => f.id === fieldId);
+  if (fieldConfig) {
+    fieldConfig.label = newLabel;
+    persist();
+    closeM('moEditLabel');
+    // Força a re-renderização da seção atual para mostrar o novo label
+    const L = db.l.find(l => l.id === curId);
+    if (L) {
+      // Re-renderiza a aba principal e a sub-aba ativa
+      const activeMainTab = document.querySelector('#mainTabs .tb.active');
+      const activeSubTab = document.querySelector(`#stb-${mainSection} .st.active`);
+      if (activeMainTab && activeSubTab) {
+        switchST(mainSection, activeSubTab.id.split('-').pop());
+      }
+    }
+  }
+  currentEditLabelContext = null;
+}
+
+// ══ KITCHEN ══
+function kitProc(L){return renderDynamicFields(L, 'kit', 'proc');}
+function kitCap(L){return renderDynamicFields(L, 'kit', 'cap');}
+function kitSpd(L){return renderDynamicFields(L, 'kit', 'spd');}
+function kitExtra(L){return renderDynamicFields(L, 'kit', 'extra');}
+
+// ══ PACKAGING ══
+function pkgProc(L){return renderDynamicFields(L, 'pkg', 'proc');}
+function pkgCap(L){return renderDynamicFields(L, 'pkg', 'cap');}
+function pkgSpd(L){return renderDynamicFields(L, 'pkg', 'spd');}
+function pkgExtra(L){return renderDynamicFields(L, 'pkg', 'extra');}
+
+// ══ OTHER ══
+function othQual(L){return renderDynamicFields(L, 'oth', 'qual');}
+function othLog(L){return renderDynamicFields(L, 'oth', 'log');}
+function othSus(L){return renderDynamicFields(L, 'oth', 'sus');}
+function othSaf(L){return renderDynamicFields(L, 'oth', 'saf');}
+
+// ══ CONFIGURAÇÕES DE CAMPOS ══
+function renderConfigManagement(mainSection, subSection, title) {
+  const fieldsConfig = db.config[mainSection][subSection];
+  const fieldItems = fieldsConfig.map((field, index) => renderConfigFieldItem(mainSection, subSection, field, index)).join('');
+
+  return `
+    <div class="card">
+      <div class="ct">${title}
+        <button class="btn bp bsm" style="margin-left:auto" onclick="openManageFieldModal('${mainSection}','${subSection}', null)">＋ Adicionar Campo</button>
+      </div>
+      <div class="config-field-list">
+        ${fieldItems.length > 0 ? fieldItems : '<div class="empty">Nenhum campo configurado para esta seção.</div>'}
+      </div>
+    </div>
+  `;
+}
+
+function renderConfigFieldItem(mainSection, subSection, field, index) {
+  const fieldTypeMap = {
+    text: 'Texto Curto',
+    textarea: 'Texto Longo',
+    number: 'Número',
+    date: 'Data'
+  };
+  return `
+    <div class="config-field-item">
+      <div class="config-field-item-label">${esc(field.label)} <span style="font-size:10px;color:var(--tm)">(${fieldTypeMap[field.type] || field.type})</span></div>
+      <div class="config-field-item-actions">
+        <button class="ib" onclick="openManageFieldModal('${mainSection}','${subSection}','${field.id}')" title="Editar Campo">✏️</button>
+        <button class="ib d" onclick="deleteField('${mainSection}','${subSection}','${field.id}')" title="Excluir Campo">🗑</button>
+      </div>
+    </div>
+  `;
+}
+
+function openManageFieldModal(mainSection, subSection, fieldId) {
+  currentManageFieldContext = { mainSection, subSection, fieldId };
+  setVal('mf_id', ''); // Limpa o ID para novos campos
+  $('mf_id').readOnly = false; // Permite edição para novos campos
+
+  if (fieldId === null) { // Adicionar novo campo
+    $('moManageFieldTitle').textContent = '➕ Novo Campo';
+    setVal('mf_label', '');
+    setVal('mf_type', 'text');
+    setVal('mf_ph', '');
+    setVal('mf_full', 'false');
+  } else { // Editar campo existente
+    $('moManageFieldTitle').textContent = '✏️ Editar Campo';
+    const fieldConfig = db.config[mainSection][subSection].find(f => f.id === fieldId);
+    if (fieldConfig) {
+      setVal('mf_label', fieldConfig.label);
+      setVal('mf_id', fieldConfig.id);
+      $('mf_id').readOnly = true; // Não permite mudar o ID de um campo existente
+      setVal('mf_type', fieldConfig.type);
+      setVal('mf_ph', fieldConfig.ph || '');
+      setVal('mf_full', fieldConfig.full ? 'true' : 'false');
+    }
+  }
+  show('moManageField');
+}
+
+function saveManagedField() {
+  if (!currentManageFieldContext) return;
+
+  const label = val('mf_label').trim();
+  const id = val('mf_id').trim();
+  const type = val('mf_type');
+  const ph = val('mf_ph').trim();
+  const full = val('mf_full') === 'true';
+
+  if (!label) { alert('O título do campo não pode ser vazio.'); return; }
+  if (!id) { alert('O ID do campo não pode ser vazio.'); return; }
+
+  const { mainSection, subSection, fieldId } = currentManageFieldContext;
+  const fieldsArray = db.config[mainSection][subSection];
+
+  if (fieldId === null) { // Adicionar novo campo
+    if (fieldsArray.some(f => f.id === id)) {
+      alert(`Já existe um campo com o ID "${id}" nesta seção. Escolha um ID único.`);
+      return;
+    }
+    const newField = { id, label, type, ph, full };
+    fieldsArray.push(newField);
+    // Para novos campos, também precisamos inicializar o valor em todas as linhas existentes
+    db.l.forEach(line => {
+      if (!line[mainSection][subSection][id]) {
+        line[mainSection][subSection][id] = '';
+      }
+    });
+  } else { // Editar campo existente
+    const fieldIndex = fieldsArray.findIndex(f => f.id === fieldId);
+    if (fieldIndex !== -1) {
+      fieldsArray[fieldIndex] = { id, label, type, ph, full };
+    }
+  }
+
+  persist();
+  closeM('moManageField');
+  // Re-renderiza a seção de configuração para mostrar as mudanças
+  switchST('config', `${mainSection}_${subSection}`);
+}
+
+function deleteField(mainSection, subSection, fieldId) {
+  if (!confirm(`Tem certeza que deseja excluir o campo "${fieldId}"? Isso removerá o campo de todas as linhas e não pode ser desfeito.`)) return;
+
+  const fieldsArray = db.config[mainSection][subSection];
+  const fieldIndex = fieldsArray.findIndex(f => f.id === fieldId);
+
+  if (fieldIndex !== -1) {
+    fieldsArray.splice(fieldIndex, 1); // Remove o campo da configuração
+
+    // Remove o valor do campo de todas as linhas existentes
+    db.l.forEach(line => {
+      if (line[mainSection] && line[mainSection][subSection]) {
+        delete line[mainSection][subSection][fieldId];
+      }
+    });
+
+    persist();
+    // Re-renderiza a seção de configuração para mostrar as mudanças
+    switchST('config', `${mainSection}_${subSection}`);
+    // Se a linha atual estiver aberta, re-renderiza a aba principal para refletir a remoção do campo
+    if (curId) {
+      const L = db.l.find(l => l.id === curId);
+      if (L) {
+        const activeMainTab = document.querySelector('#mainTabs .tb.active');
+        const activeSubTab = document.querySelector(`#stb-${mainSection} .st.active`);
+        if (activeMainTab && activeSubTab) {
+          switchST(mainSection, activeSubTab.id.split('-').pop());
+        }
+      }
+    }
+  }
+}
+
+// ══ RECEITAS ══
+function recList(L,sec){
+  const items=L[sec].recipes;
+  const lbl=sec==='kit'?'Cozinha':'Embalagem';
+  const title=sec==='kit'?'📋 Receitas':'📋 Formulações';
+  const rows=items.length
+    ?items.map((r,i)=>`<div class="li">
+        <div class="li-b">
+          <div class="li-t">${esc(r.name)}</div>
+          <div class="li-m">${[r.code,r.ver,r.yield?r.yield+' kg/lote':'',r.time,r.status].filter(Boolean).join(' · ')}</div>
+          ${r.obs?`<div class="li-m" style="margin-top:4px">${esc(r.obs)}</div>`:''}
+        </div>
+        <div class="li-a">
+          <button class="ib" onclick="openRec('${sec}',${i})" title="Editar">✏️</button>
+          <button class="ib d" onclick="delRec('${sec}',${i})" title="Excluir">🗑</button>
+        </div>
+      </div>`).join('')
+    :'<div class="empty">Nenhuma receita cadastrada ainda.</div>';
+  return`<div class="card"><div class="ct">${title} — ${lbl}
+    <button class="btn bp bsm" style="margin-left:auto" onclick="openRec('${sec}',null)">＋ Adicionar</button>
+  </div><div class="li-list">${rows}</div></div>`;
+}
+
+function openRec(sec,idx){
+  recCtx={sec,idx};
+  $('moRecT').textContent=idx===null?'📋 Nova Receita':'📋 Editar Receita';
+  const r=idx!==null?db.l.find(l=>l.id===curId)[sec].recipes[idx]:{};
+  setVal('rec_name',r.name||'');
+  setVal('rec_code',r.code||'');
+  setVal('rec_ver',r.ver||'');
+  setVal('rec_yield',r.yield||'');
+  setVal('rec_time',r.time||'');
+  setVal('rec_obs',r.obs||'');
+  $('rec_st').value=r.status||'Ativa';
+  show('moRec');
+}
+
+function saveRec(){
+  const name=val('rec_name').trim();
+  if(!name){alert('Informe o nome da receita.');return;}
+  const L=db.l.find(l=>l.id===curId);
+  const r={name,code:val('rec_code').trim(),ver:val('rec_ver').trim(),
+    yield:val('rec_yield').trim(),time:val('rec_time').trim(),
+    status:val('rec_st'),obs:val('rec_obs').trim()};
+  const {sec,idx}=recCtx;
+  if(idx===null)L[sec].recipes.push(r);
+  else L[sec].recipes[idx]=r;
+  persist();closeM('moRec');
+  updateStats(L);
+  switchST(sec==='kit'?'kit':'pkg','recipes');
+}
+
+function delRec(sec,idx){
+  if(!confirm('Excluir esta receita?'))return;
+  const L=db.l.find(l=>l.id===curId);
+  L[sec].recipes.splice(idx,1);
+  persist();updateStats(L);
+  switchST(sec==='kit'?'kit':'pkg','recipes');
+}
+
+// ══ EQUIPAMENTOS ══
+function eqList(L,sec){
+  const items=L[sec].equip;
+  const lbl=sec==='kit'?'Cozinha':'Embalagem';
+  const scMap={Operacional:'tg','Em Manutenção':'to',Parado:'tr','Em Standby':''};
+  const rows=items.length
+    ?items.map((e,i)=>`<div class="li">
+        <div class="li-b">
+          <div class="li-t">${esc(e.name)}${e.model?' — '+esc(e.model):''}</div>
+          <div class="li-m">${[e.maker,e.year,e.tag,e.cap,e.kw?e.kw+' kW':''].filter(Boolean).join(' · ')}</div>
+          <div class="li-m" style="margin-top:4px">
+            ${e.status?`<span class="tag ${scMap[e.status]||''}" style="font-size:10px">${esc(e.status)}</span>`:''}
+            ${e.lm?' &nbsp;Últ: '+esc(e.lm):''}
+            ${e.nm?' &nbsp;Próx: '+esc(e.nm):''}
+          </div>
+          ${e.obs?`<div class="li-m" style="margin-top:4px">${esc(e.obs)}</div>`:''}
+        </div>
+        <div class="li-a">
+          <button class="ib" onclick="openEq('${sec}',${i})" title="Editar">✏️</button>
+          <button class="ib d" onclick="delEq('${sec}',${i})" title="Excluir">🗑</button>
+        </div>
+      </div>`).join('')
+    :'<div class="empty">Nenhum equipamento cadastrado ainda.</div>';
+  return`<div class="card"><div class="ct">🔩 Equipamentos — ${lbl}
+    <button class="btn bp bsm" style="margin-left:auto" onclick="openEq('${sec}',null)">＋ Adicionar</button>
+  </div><div class="li-list">${rows}</div></div>`;
+}
+
+function openEq(sec,idx){
+  eqCtx={sec,idx};
+  $('moEqT').textContent=idx===null?'🔩 Novo Equipamento':'🔩 Editar Equipamento';
+  const e=idx!==null?db.l.find(l=>l.id===curId)[sec].equip[idx]:{};
+  setVal('eq_name',e.name||'');setVal('eq_model',e.model||'');
+  setVal('eq_maker',e.maker||'');setVal('eq_year',e.year||'');
+  setVal('eq_serial',e.serial||'');setVal('eq_tag',e.tag||'');
+  setVal('eq_cap',e.cap||'');setVal('eq_kw',e.kw||'');
+  setVal('eq_lm',e.lm||'');setVal('eq_nm',e.nm||'');
+  setVal('eq_obs',e.obs||'');
+  $('eq_st').value=e.status||'Operacional';
+  show('moEq');
+}
+
+function saveEq(){
+  const name=val('eq_name').trim();
+  if(!name){alert('Informe o nome do equipamento.');return;}
+  const L=db.l.find(l=>l.id===curId);
+  const e={name,model:val('eq_model').trim(),maker:val('eq_maker').trim(),
+    year:val('eq_year').trim(),serial:val('eq_serial').trim(),
+    tag:val('eq_tag').trim(),cap:val('eq_cap').trim(),
+    kw:val('eq_kw').trim(),lm:val('eq_lm'),nm:val('eq_nm'),
+    status:val('eq_st'),obs:val('eq_obs').trim()};
+  const {sec,idx}=eqCtx;
+  if(idx===null)L[sec].equip.push(e);
+  else L[sec].equip[idx]=e;
+  persist();closeM('moEq');
+  updateStats(L);
+  switchST(sec==='kit'?'kit':'pkg','equip');
+}
+
+function delEq(sec,idx){
+  if(!confirm('Excluir este equipamento?'))return;
+  const L=db.l.find(l=>l.id===curId);
+  L[sec].equip.splice(idx,1);
+  persist();updateStats(L);
+  switchST(sec==='kit'?'kit':'pkg','equip');
+}
+
+// ══ PESQUISA ══
+function doSearch(q){
+  q=q.trim().toLowerCase();
+  if(!q){
+    if(curId)showPage('pgDetail');
+    else showPage('pgWelcome');
+    return;
+  }
+  showPage('pgSearch');
+  const results=[];
+  db.f.forEach(fac=>{
+    if(fac.name.toLowerCase().includes(q)||
+      (fac.loc&&fac.loc.toLowerCase().includes(q))||
+      (fac.mgr&&fac.mgr.toLowerCase().includes(q))){
+      results.push({type:'factory',fac,line:null});
+    }
+  });
+  db.l.forEach(line=>{
+    const fac=db.f.find(f=>f.id===line.fid);
+    if(line.name.toLowerCase().includes(q)||
+      (line.code&&line.code.toLowerCase().includes(q))||
+      (line.prod&&line.prod.toLowerCase().includes(q))){
+      results.push({type:'line',fac,line});
+    }
+    line.kit.recipes.forEach(r=>{
+      if(r.name.toLowerCase().includes(q)||(r.code&&r.code.toLowerCase().includes(q))){
+        results.push({type:'recipe',fac,line,item:r,sec:'kit'});
+      }
+    });
+    line.pkg.recipes.forEach(r=>{
+      if(r.name.toLowerCase().includes(q)||(r.code&&r.code.toLowerCase().includes(q))){
+        results.push({type:'recipe',fac,line,item:r,sec:'pkg'});
+      }
+    });
+    line.kit.equip.forEach(e=>{
+      if(e.name.toLowerCase().includes(q)||
+        (e.model&&e.model.toLowerCase().includes(q))||
+        (e.tag&&e.tag.toLowerCase().includes(q))){
+        results.push({type:'equip',fac,line,item:e,sec:'kit'});
+      }
+    });
+    line.pkg.equip.forEach(e=>{
+      if(e.name.toLowerCase().includes(q)||
+        (e.model&&e.model.toLowerCase().includes(q))||
+        (e.tag&&e.tag.toLowerCase().includes(q))){
+        results.push({type:'equip',fac,line,item:e,sec:'pkg'});
+      }
+    });
+  });
+
+  const typeLabel={factory:'🏭 Fábrica',line:'⚙️ Linha',recipe:'📋 Receita',equip:'🔩 Equipamento'};
+
+  if(!results.length){
+    $('srList').innerHTML=`<div class="empty">Nenhum resultado encontrado para "<strong>${esc(q)}</strong>".</div>`;
+    return;
+  }
+
+  $('srList').innerHTML=results.map(r=>{
+    let title='',meta='',onclick='';
+    if(r.type==='factory'){
+      title=r.fac.name;
+      meta=[r.fac.loc,r.fac.cnpj,r.fac.mgr].filter(Boolean).join(' · ');
+      onclick='';
+    }else if(r.type==='line'){
+      title=r.line.name;
+      meta=[r.fac?r.fac.name:'',r.line.code,r.line.prod].filter(Boolean).join(' · ');
+      onclick=`onclick="openLine('${r.line.id}');setVal('gSearch','');"`;
+    }else if(r.type==='recipe'){
+      title=r.item.name;
+      meta=[r.fac?r.fac.name:'',r.line.name,r.item.code,r.item.status].filter(Boolean).join(' · ');
+      onclick=`onclick="openLine('${r.line.id}');setVal('gSearch','');"`;
+    }else{
+      title=r.item.name+(r.item.model?' — '+r.item.model:'');
+      meta=[r.fac?r.fac.name:'',r.line.name,r.item.tag,r.item.status].filter(Boolean).join(' · ');
+      onclick=`onclick="openLine('${r.line.id}');setVal('gSearch','');"`;
+    }
+    return`<div class="sr-card" ${onclick}>
+      <div style="font-size:10px;color:var(--acc);font-weight:600;margin-bottom:4px">${typeLabel[r.type]}</div>
+      <div class="sr-t">${esc(title)}</div>
+      <div class="sr-m">${esc(meta)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══ EXPORTAR / IMPORTAR ══
+function exportData(){
+  const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='processys_dados_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importData(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const imported=JSON.parse(e.target.result);
+      // Validação básica para garantir que é um arquivo do ProcesSys
+      if(!imported.f||!imported.l||!imported.config){
+        alert('Arquivo inválido. Verifique se é um arquivo de dados do ProcesSys.');
+        return;
+      }
+
+      const action = prompt('Dados importados. Escolha uma opção:\n1. Substituir tudo (apaga os dados atuais)\n2. Mesclar (adiciona os novos dados aos existentes)\n\nDigite "1" ou "2".');
+
+      if (action === '1') {
+        db = imported; // Substitui tudo
+        alert('Dados substituídos com sucesso!');
+      } else if (action === '2') {
+        // Mesclar fábricas
+        imported.f.forEach(newFac => {
+          if (!db.f.some(existingFac => existingFac.id === newFac.id)) {
+            db.f.push(newFac);
+          } else {
+            // Opcional: Atualizar fábricas existentes se IDs coincidirem
+            const index = db.f.findIndex(existingFac => existingFac.id === newFac.id);
+            db.f[index] = newFac;
+          }
+        });
+
+        // Mesclar linhas
+        imported.l.forEach(newLine => {
+          if (!db.l.some(existingLine => existingLine.id === newLine.id)) {
+            db.l.push(newLine);
+          } else {
+            // Opcional: Atualizar linhas existentes se IDs coincidirem
+            const index = db.l.findIndex(existingLine => existingLine.id === newLine.id);
+            db.l[index] = newLine;
+          }
+        });
+
+        // Mesclar configurações (mais complexo, vamos sobrescrever por simplicidade agora)
+        // Para uma mesclagem real de config, precisaríamos de lógica para cada nível
+        // Por enquanto, a config importada sobrescreve a atual se houver conflito, ou adiciona novos campos
+        // Se a config importada for mais recente ou tiver campos novos, ela será preferida.
+        // Para este exemplo, vamos simplesmente usar a config importada, pois é a mais simples.
+        // Em um cenário real, seria necessário uma lógica de mesclagem mais granular para cada subseseção e campo.
+        db.config = imported.config; // Sobrescreve a configuração de campos
+
+        alert('Dados mesclados com sucesso!');
+      } else {
+        alert('Importação cancelada ou opção inválida.');
+        event.target.value = ''; // Limpa o input do arquivo
+        return;
+      }
+
+      persist();
+      curId=null;
+      renderSB();
+      showPage('pgWelcome');
+      $('tbTitle').textContent='Gestão de Processos';
+      $('tbSub').textContent='Selecione uma linha de produção';
+      $('tbActs').innerHTML='';
+
+    }catch(error){
+      console.error("Erro na importação:", error);
+      alert('Erro ao ler o arquivo. Verifique se é um arquivo JSON válido do ProcesSys.');
+    }
+    event.target.value=''; // Limpa o input do arquivo
+  };
+  reader.readAsText(file);
+}
+
+// ══ INIT ══
+renderSB();
+</script>
+</body>
+</html>
