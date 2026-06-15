@@ -135,6 +135,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg1);color:var
   #sbBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:250}
   #sbBackdrop.show{display:block}
 }
+.main{min-width:0}
+@media(max-width:768px){
+  html,body{overflow-x:hidden}
+  .main{width:100%}
+  .content{padding:14px}
+  .topbar{padding:12px 14px}
+  .stats{grid-template-columns:1fr 1fr;gap:10px}
+  .fg2{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>

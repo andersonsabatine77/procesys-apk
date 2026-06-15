@@ -50,6 +50,8 @@ public class MainActivity extends Activity {
         s.setAllowFileAccess(true);
         s.setAllowContentAccess(true);
         s.setMediaPlaybackRequiresUserGesture(false);
+        s.setUseWideViewPort(true);      // respeita o <meta viewport> da página
+        s.setLoadWithOverviewMode(true); // ajusta o conteúdo à largura da tela
 
         web.setWebViewClient(new WebViewClient());
 
