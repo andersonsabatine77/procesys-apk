@@ -123,10 +123,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg1);color:var
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
 @media(max-width:768px){.sb{transform:translateX(-100%)}.main{margin-left:0}.stats{grid-template-columns:1fr 1fr}}
+.sb{transition:transform .25s ease}
+#mobMenuBtn{display:none}
+#sbBackdrop{display:none}
+@media(max-width:768px){
+  #mobMenuBtn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:none;background:var(--bgi);color:var(--t1);border-radius:8px;font-size:20px;line-height:1;cursor:pointer;flex-shrink:0}
+  .topbar{justify-content:flex-start;gap:10px}
+  .topbar .tb-a{margin-left:auto}
+  .sb{z-index:300;box-shadow:4px 0 20px rgba(0,0,0,.5)}
+  .sb.open{transform:translateX(0)!important}
+  #sbBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:250}
+  #sbBackdrop.show{display:block}
+}
 </style>
 </head>
 <body>
 <div class="layout">
+<div id="sbBackdrop" onclick="closeSidebar()"></div>
 
 <aside class="sb">
   <div class="sb-head">
@@ -152,7 +165,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg1);color:var
 </aside>
 
 <div class="main">
-  <div class="topbar">
+  <div class="topbar"><button id="mobMenuBtn" onclick="toggleSidebar()" aria-label="Menu">&#9776;</button>
     <div><div class="tb-t" id="tbTitle">Gestão de Processos</div><div class="tb-s" id="tbSub">Selecione uma linha de produção</div></div>
     <div class="tb-a" id="tbActs"></div>
   </div>
@@ -1410,6 +1423,9 @@ function importData(event){
 
 // ══ INIT ══
 renderSB();
+function toggleSidebar(force){var sb=document.querySelector('.sb');var bd=document.getElementById('sbBackdrop');var open=(force===undefined)?!sb.classList.contains('open'):force;sb.classList.toggle('open',open);if(bd)bd.classList.toggle('show',open);}
+function closeSidebar(){toggleSidebar(false);}
+(function(){var t=document.getElementById('sbTree');if(t){t.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('.ln-row'))closeSidebar();});}})();
 </script>
 </body>
 </html>
